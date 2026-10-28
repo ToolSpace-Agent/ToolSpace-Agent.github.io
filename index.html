@@ -29,7 +29,7 @@ section{padding:96px 0 8px}
 .sec-head{max-width:760px;margin-bottom:42px}
 .sec-head h2{font-size:clamp(30px,4.2vw,46px);font-weight:850;margin:14px 0 14px}
 .sec-head p{color:var(--ink2);font-size:16.5px;margin:0}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
 .reveal.in{opacity:1;transform:none}
 @media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none} html{scroll-behavior:auto}}
 
@@ -366,9 +366,16 @@ input[type=range]{accent-color:#3b82f6}
 .chart-legend button{border:1px solid var(--line);background:#0d1730;color:var(--ink2);border-radius:99px;padding:5px 11px;font:600 11px Inter,system-ui;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
 .chart-legend button i{width:14px;height:3px;border-radius:99px;display:inline-block}
 .chart-legend button:hover{border-color:#3b82f6;color:#fff}
+
+/* cursor comet (adapted from long-horizon-agents.github.io, tuned for dark theme) */
+.cursor-comet{position:fixed;inset:0;z-index:90;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity .22s ease;mix-blend-mode:screen}
+.cursor-comet.visible{opacity:1}
+@media (prefers-reduced-motion:reduce){.cursor-comet{display:none}}
+@media (hover:none),(pointer:coarse){.cursor-comet{display:none}}
 </style>
 </head>
 <body>
+<canvas class="cursor-comet" aria-hidden="true"></canvas>
 
 <nav id="nav"><div class="bar">
   <a class="logo" href="#top"><i></i>TOOLSPACE</a>
@@ -390,7 +397,7 @@ input[type=range]{accent-color:#3b82f6}
     <div class="hero-btns">
       <a class="btn btn-primary" href="./main.pdf" target="_blank" rel="noopener">📄 &nbsp;Paper</a>
       <a class="btn btn-ghost" href="#demo">✦ &nbsp;Try Demo</a>
-      <a class="btn btn-ghost" href="https://github.com/ToolSpace-Agent/ToolSpace-Agent.github.io" target="_blank" rel="noopener">GitHub ↗</a>
+      <a class="btn btn-ghost" href="https://github.com/dongguanting/ToolSpace" target="_blank" rel="noopener">GitHub ↗</a>
       <a class="btn btn-ghost" href="https://huggingface.co/collections?search=ToolSpace" target="_blank" rel="noopener">🤗 &nbsp;Hugging Face Collection ↗</a>
       <a class="btn btn-ghost" href="#cite">BibTeX ↓</a>
     </div>
@@ -616,10 +623,85 @@ input[type=range]{accent-color:#3b82f6}
 /* ================= NAV / REVEAL ================= */
 const nav=document.getElementById('nav');
 addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>innerHeight*.72),{passive:true});
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.08});
-document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach((el,i)=>{el.style.transitionDelay=(Math.min(i%4,3)*70)+'ms';io.observe(el)});
 const copyBibText=async btn=>{const orig=btn.textContent;const text=document.getElementById('bibtex').textContent;try{await navigator.clipboard.writeText(text);btn.textContent='Copied ✓'}catch(_){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');btn.textContent='Copied ✓'}catch(__){btn.textContent='Select & copy manually'}ta.remove()}setTimeout(()=>btn.textContent=orig,1800)};
 document.getElementById('copyBib').onclick=e=>copyBibText(e.target);
+/* ================= CURSOR COMET (mouse trail, ported from long-horizon-agents.github.io) ================= */
+(()=>{
+  if(!matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const canvas=document.querySelector('.cursor-comet');if(!canvas)return;
+  const context=canvas.getContext('2d');
+  let currentX=0,currentY=0,targetX=0,targetY=0,frame=0,started=false,inside=false,active=false;
+  let trail=[],sparks=[],burstTick=0;
+  function resizeCanvas(){const ratio=Math.min(devicePixelRatio||1,2);
+    canvas.width=Math.round(innerWidth*ratio);canvas.height=Math.round(innerHeight*ratio);
+    context.setTransform(ratio,0,0,ratio,0,0)}
+  function requestDraw(){if(!frame)frame=requestAnimationFrame(drawComet)}
+  function glow(x,y,radius,inner,outer){
+    const gradient=context.createRadialGradient(x,y,0,x,y,radius);
+    gradient.addColorStop(0,inner);gradient.addColorStop(.3,outer);gradient.addColorStop(1,'rgba(47,95,224,0)');
+    context.fillStyle=gradient;context.beginPath();context.arc(x,y,radius,0,Math.PI*2);context.fill()}
+  function drawComet(){
+    frame=0;
+    const dx=targetX-currentX,dy=targetY-currentY,speed=Math.hypot(dx,dy),moving=speed>.18;
+    currentX+=dx*.24;currentY+=dy*.24;
+    if(inside&&moving){
+      trail.unshift({x:currentX,y:currentY,life:1,size:2.2+Math.random()*2.4,wobble:(Math.random()-.5)*5});
+      if(trail.length>34)trail.length=34;
+      burstTick++;
+      if(speed>7&&burstTick%3===0){
+        const direction=Math.atan2(dy,dx)+Math.PI;
+        const amount=Math.min(7,3+Math.floor(speed/22));
+        for(let i=0;i<amount;i++){
+          const angle=direction+(Math.random()-.5)*2.2;
+          const force=1.2+Math.random()*Math.min(5.5,1.8+speed*.045);
+          sparks.push({x:currentX-dx*.025+(Math.random()-.5)*6,y:currentY-dy*.025+(Math.random()-.5)*6,
+            vx:Math.cos(angle)*force,vy:Math.sin(angle)*force,life:.72+Math.random()*.28,size:1.1+Math.random()*2.2});
+        }
+        if(sparks.length>90)sparks.splice(0,sparks.length-90);
+      }
+    }
+    trail.forEach(point=>{point.life*=moving?.955:.91;point.y+=point.wobble*.018;point.size*=.994});
+    trail=trail.filter((point,index)=>point.life>.035&&index<34);
+    sparks.forEach(spark=>{spark.x+=spark.vx;spark.y+=spark.vy;spark.vx*=.94;spark.vy*=.94;spark.life*=.89;spark.size*=.985});
+    sparks=sparks.filter(spark=>spark.life>.035);
+    context.clearRect(0,0,innerWidth,innerHeight);
+    context.save();context.globalCompositeOperation='lighter';
+    if(trail.length>1){
+      const last=trail[trail.length-1];
+      const streak=context.createLinearGradient(currentX,currentY,last.x+.01,last.y+.01);
+      streak.addColorStop(0,'rgba(91,141,239,.72)');streak.addColorStop(.45,'rgba(47,95,224,.28)');streak.addColorStop(1,'rgba(30,58,138,0)');
+      context.strokeStyle=streak;context.lineWidth=active?5:3.5;context.lineCap='round';context.lineJoin='round';
+      context.beginPath();context.moveTo(currentX,currentY);
+      trail.forEach((point,index)=>{if(index%2===0)context.lineTo(point.x,point.y)});context.stroke();
+    }
+    trail.forEach((point,index)=>{context.globalAlpha=point.life*(1-index/trail.length)*.72;
+      glow(point.x,point.y,point.size*3,'rgba(138,181,255,.85)','rgba(47,95,224,.24)')});
+    sparks.forEach(spark=>{context.globalAlpha=spark.life*.9;
+      glow(spark.x,spark.y,spark.size*3.8,'rgba(255,255,255,.96)','rgba(91,141,239,.34)');
+      context.fillStyle='rgba(47,95,224,'+Math.min(.9,spark.life)+')';
+      context.beginPath();context.arc(spark.x,spark.y,Math.max(.55,spark.size*.52),0,Math.PI*2);context.fill()});
+    context.globalAlpha=inside?1:.45;
+    glow(currentX,currentY,active?25:20,'rgba(255,255,255,.98)','rgba(91,141,239,.48)');
+    glow(currentX,currentY,active?10:8,'rgba(255,255,255,1)','rgba(47,95,224,.88)');
+    context.restore();
+    if(moving||trail.length>1||sparks.length)requestDraw();
+  }
+  resizeCanvas();addEventListener('resize',()=>{resizeCanvas();requestDraw()},{passive:true});
+  document.addEventListener('pointermove',event=>{
+    targetX=event.clientX;targetY=event.clientY;
+    if(!started){currentX=targetX;currentY=targetY;started=true}
+    inside=true;canvas.classList.add('visible');requestDraw();
+  },{passive:true});
+  document.addEventListener('pointerover',event=>{
+    active=!!event.target.closest('a,button,input,label,.rank-row,.cand,.mini-step,.res-card,.step,.cmp,.scale-card,.pro-card');requestDraw();
+  },{passive:true});
+  document.documentElement.addEventListener('mouseleave',()=>{inside=false;canvas.classList.remove('visible');requestDraw()});
+  document.documentElement.addEventListener('mouseenter',()=>{inside=true;if(started){canvas.classList.add('visible');requestDraw()}});
+})();
+
 document.getElementById('copyBibTop').onclick=e=>copyBibText(e.target);
 
 /* ================= HERO: photoreal starfield -> directly into TOOLSPACE ================= */
