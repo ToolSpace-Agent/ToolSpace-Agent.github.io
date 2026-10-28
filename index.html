@@ -402,6 +402,23 @@ input[type=range]{accent-color:#3b82f6}
 /* paper mode (?paper=1): flattened demo layout for paper screenshots */
 body.paper .demo-grid{height:524px}
 body.paper .demo-right>p.r-title:last-of-type,body.paper .call-detail{display:none}
+
+/* tool-call comparison (paper Fig. pro-complexity) */
+.tc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+@media(max-width:860px){.tc-grid{grid-template-columns:1fr}}
+.tc-legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin:2px 0 14px}
+.tc-legend i{width:16px;height:7px;border-radius:99px;display:inline-block;vertical-align:middle;margin-right:5px}
+.tc-m{margin-bottom:14px}.tc-m:last-child{margin-bottom:2px}
+.tc-hd{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:5px}
+.tc-hd b{color:var(--ink)}
+.tc-delta{font-size:10.5px;font-weight:800;color:#93c5fd;background:rgba(59,130,246,.13);border:1px solid rgba(59,130,246,.4);padding:1px 8px;border-radius:99px}
+.tc-row{display:grid;grid-template-columns:30px 1fr 38px;gap:9px;align-items:center;font-size:10.5px;color:var(--muted);margin-bottom:4px}
+.tc-row b{color:var(--ink);text-align:right;font-size:11.5px}
+.tc-track{height:9px;background:#16223f;border-radius:99px;overflow:hidden}
+.tc-track i{display:block;height:100%;border-radius:99px}
+.tc-track .std{background:#7d92bd}
+.tc-track .pro{background:linear-gradient(90deg,#3b82f6,#7c5cff)}
+.tc-note{font-size:12px;color:var(--muted);margin-top:14px}
 </style>
 </head>
 <body>
@@ -609,6 +626,15 @@ body.paper .demo-right>p.r-title:last-of-type,body.paper .call-detail{display:no
     <article class="pro-card"><h3>τ³-Bench Banking Pro</h3><p class="sub2">98 tasks · standard → Pro score, six frontier models</p><div id="proTau"></div>
       </article>
   </div>
+  <div class="tc-grid reveal">
+    <article class="pro-card"><h3>Tool calls · AutomationBench</h3><p class="sub2">Average tool calls per task · Standard vs. Pro</p>
+      <div class="tc-legend"><span><i style="background:#7d92bd"></i>Standard</span><span><i style="background:linear-gradient(90deg,#3b82f6,#7c5cff)"></i>Pro</span></div>
+      <div id="callsAuto"></div></article>
+    <article class="pro-card"><h3>Tool calls · τ³-Bench Banking</h3><p class="sub2">Average tool calls per task · Standard vs. Pro</p>
+      <div class="tc-legend"><span><i style="background:#7d92bd"></i>Standard</span><span><i style="background:linear-gradient(90deg,#3b82f6,#7c5cff)"></i>Pro</span></div>
+      <div id="callsTau"></div></article>
+  </div>
+  <p class="tc-note reveal">Pro tasks are longer, not just harder to guess: on AutomationBench every frontier model needs roughly <b style="color:var(--ink)">1.4 to 2.1×</b> as many tool calls as on the standard split (26.8–43.6 → 56.3–60.6), and τ³-Bench Banking also rises for every model (23.1–32.2 → 27.3–36.3). Data read from the paper's tool-call comparison (Figure 6).</p>
 </div></section>
 
 <!-- ================= ANALYSIS ================= -->
@@ -1101,6 +1127,14 @@ const PRO_TAU=[['Claude Opus 5.5',51.5,35.7],['GPT 6.1 Sol',46.4,29.6],['DeepSee
 function proHTML(rows){return rows.map(([n,s,p])=>`<div class="drop-row"><div class="hd"><b>${n}</b><span>Std ${s.toFixed(1)} → Pro ${p.toFixed(1)} &nbsp;<span class="delta">−${(s-p).toFixed(1)}</span></span></div>
   <div class="drop-track"><div class="drop-std" style="width:${s}%"></div><div class="drop-pro" style="width:${p}%"></div></div></div>`).join('')}
 $('proAuto').innerHTML=proHTML(PRO_AUTO);$('proTau').innerHTML=proHTML(PRO_TAU);
+/* ================= TOOL-CALL COMPARISON (paper Fig. 6) ================= */
+const CALLS_AUTO=[['Claude Opus 5.5',26.8,56.4],['GPT 5.6 Sol',43.6,60.6],['GLM 5.3',33.0,56.3]];
+const CALLS_TAU=[['Claude Opus 5.5',31.7,36.3],['GPT 5.6 Sol',23.1,27.3],['GLM 5.3',32.2,33.2]];
+function callsHTML(rows,max){return rows.map(([n,s,p])=>`<div class="tc-m"><div class="tc-hd"><b>${n}</b><span class="tc-delta">+${(p-s).toFixed(1)} · ×${(p/s).toFixed(2)}</span></div>
+  <div class="tc-row"><span>Std</span><span class="tc-track"><i class="std" style="width:${s/max*100}%"></i></span><b>${s.toFixed(1)}</b></div>
+  <div class="tc-row"><span>Pro</span><span class="tc-track"><i class="pro" style="width:${p/max*100}%"></i></span><b>${p.toFixed(1)}</b></div></div>`).join('')}
+$('callsAuto').innerHTML=callsHTML(CALLS_AUTO,66);$('callsTau').innerHTML=callsHTML(CALLS_TAU,40);
+
 
 </script>
 </body>
