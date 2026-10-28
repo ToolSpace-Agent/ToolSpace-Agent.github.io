@@ -747,23 +747,43 @@ document.getElementById('copyBibTop').onclick=e=>copyBibText(e.target);
     g.fillStyle=gr;g.beginPath();g.arc(16,16,16,0,6.29);g.fill();return c;
   }
   const HALO_B=haloSprite('190,215,255'), HALO_W=haloSprite('255,225,190');
+  const HALO_CY=haloSprite('103,232,249'), HALO_VI=haloSprite('167,139,250'), HALO_PK=haloSprite('244,114,182');
+  const hexCol=t=>{const stops=[[165,243,252],[147,197,253],[196,181,253],[240,171,252]];
+    const i=Math.min(2,Math.floor(t*3)),f=t*3-i,a=stops[i],b=stops[i+1];
+    return `rgb(${a.map((v,k)=>Math.round(v+(b[k]-v)*f)).join(',')})`};
   function targets(){
     const off=document.createElement('canvas');off.width=W;off.height=H;const o=off.getContext('2d');
     const fs=Math.min(W/9.4,124);o.font=`900 ${fs}px Inter,system-ui,sans-serif`;o.textAlign='center';o.textBaseline='middle';
     o.fillStyle='#fff';o.fillText('TOOLSPACE',W/2,H*.315);
     const d=o.getImageData(0,0,W,H).data,pts=[],gap=3;
     for(let y=0;y<H;y+=gap)for(let x=0;x<W;x+=gap)if(d[(y*W+x)*4+3]>120)pts.push({x:x+(Math.random()-.5)*1.6,y:y+(Math.random()-.5)*1.6});
+    // hexagram logo mark beside the wordmark: two overlapping triangles, blue-to-magenta by x
+    const tw=o.measureText('TOOLSPACE').width, s=Math.min(fs*1.04,118);
+    const side=W>=900, cx=side? W/2-tw/2-s*.74 : W/2, cy=side? H*.315 : H*.315-fs*1.06;
+    const U=(u,v)=>({x:cx+(u-.5)*s, y:cy+(v-.5)*s});
+    const tri1=[U(.5,.07),U(.13,.74),U(.87,.74)], tri2=[U(.5,.93),U(.13,.26),U(.87,.26)];
+    const edges=[...tri1,tri1[0],...tri2,tri2[0]];
+    for(let e=0;e<edges.length-1;e++){const a=edges[e],b=edges[e+1];if(e===3)continue;
+      const n=Math.max(4,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/3));
+      for(let i=0;i<n;i++){const f=i/n,x=a.x+(b.x-a.x)*f,y=a.y+(b.y-a.y)*f;
+        pts.push({x:x+(Math.random()-.5)*1.5,y:y+(Math.random()-.5)*1.5,hex:1,t:(x-(cx-s/2))/s})}}
+    const inTri=(p,a,b,c)=>{const sgn=(p1,p2,p3)=>(p1.x-p3.x)*(p2.y-p3.y)-(p2.x-p3.x)*(p1.y-p3.y);
+      const d1=sgn(p,a,b),d2=sgn(p,b,c),d3=sgn(p,c,a);return !(((d1<0)||(d2<0)||(d3<0))&&((d1>0)||(d2>0)||(d3>0)))};
+    for(let i=0;i<85;i++){const p={x:cx+(Math.random()-.5)*s,y:cy+(Math.random()-.5)*s};
+      if(inTri(p,...tri1)||inTri(p,...tri2))pts.push({...p,hex:1,inner:1,t:(p.x-(cx-s/2))/s})}
+    for(const v of [...tri1,...tri2])for(let i=0;i<3;i++)
+      pts.push({x:v.x+(Math.random()-.5)*3,y:v.y+(Math.random()-.5)*3,hex:1,vertex:1,t:(v.x-(cx-s/2))/s});
     return pts;
   }
   function build(){
     W=hero.clientWidth;H=hero.clientHeight;if(!W||!H){parts=[];bgStars=[];return}
     cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-    parts=targets().filter(()=>Math.random()>.22).map(pt=>{
+    parts=targets().filter(pt=>pt.hex||Math.random()>.22).map(pt=>{
       const sx=Math.random()*W, sy=Math.random()*H;
       const dist=Math.hypot(pt.x-sx,pt.y-sy);
       const tier=Math.random(); // brightness tiers, photoreal distribution
       const warm=Math.random()<.16;
-      return {sx,sy,tx:pt.x,ty:pt.y,
+      return {sx,sy,tx:pt.x,ty:pt.y,hex:pt.hex,inner:pt.inner,vertex:pt.vertex,t:pt.t||0,
         delay:.55+Math.random()*.85+dist*.00035, dur:1.5+Math.random()*.8,
         curve:(Math.random()-.5)*130,
         r: tier<.62? .7+Math.random()*.6 : tier<.88? 1.25+Math.random()*.75 : 1.9+Math.random()*.9,
@@ -772,6 +792,11 @@ document.getElementById('copyBibTop').onclick=e=>copyBibText(e.target);
         halo: warm? HALO_W: HALO_B,
         ph:Math.random()*6.28, tw:.5+Math.random()*1.4, x:sx, y:sy};
     });
+    for(const pt of parts){if(!pt.hex)continue;
+      pt.col=hexCol(pt.t); pt.halo=pt.t<.36?HALO_CY:pt.t<.68?HALO_VI:HALO_PK; pt.bright=true;
+      if(pt.vertex){pt.r=2.1+Math.random()*.7;pt.flare=true}
+      else if(pt.inner){pt.r=.75+Math.random()*.75}
+      else{pt.r=1.05+Math.random()*1.0}}
     bgStars=Array.from({length:650},()=>({x:Math.random()*W,y:Math.random()*H,
       r:.35+Math.random()*.75, a:.12+Math.random()*.4, ph:Math.random()*6.28, tw:.3+Math.random()*.9,
       col:Math.random()<.14?'#ffd9ae':(Math.random()<.5?'#fff':'#cfe2ff')}));
