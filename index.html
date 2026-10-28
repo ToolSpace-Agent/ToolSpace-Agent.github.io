@@ -890,7 +890,7 @@ document.getElementById('copyBibTop').onclick=e=>copyBibText(e.target);
     hud();renderCode();if(!cur)return;
     $('callTool').textContent=cur.id;
     $('callTags').innerHTML=`<span>${ENVS[cur.env].name}</span><span>${cur.mut?'state-mutating':'query / stateless'}</span><span>depth ${chain.length}</span>`;
-    $('callMut').textContent=`state s${chain.length-1} · ${mutations} mutation${mutations===1?'':'s'} · snapshot checkpointed before each execute()`;
+    $('callMut').textContent=`state s${chain.length-1} · ${mutations} mutation${mutations===1?'':'s'} · checkpoint saved pre-execute()`;
     const ps=probs(cur);
     $('candList').innerHTML=ps.length?ps.slice(0,4).map(x=>`<button class="cand" data-to="${x.to.id}">
       <span class="r1"><span class="nm">${x.to.id}</span><span class="pc">${(x.p*100).toFixed(1)}%</span></span>
