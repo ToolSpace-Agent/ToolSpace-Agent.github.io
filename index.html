@@ -372,6 +372,31 @@ input[type=range]{accent-color:#3b82f6}
 .cursor-comet.visible{opacity:1}
 @media (prefers-reduced-motion:reduce){.cursor-comet{display:none}}
 @media (hover:none),(pointer:coarse){.cursor-comet{display:none}}
+
+/* compact demo right panel (fit candidates + code + checkpoint in one screen) */
+.demo-right{padding:11px 12px}
+.demo-right .r-title{font-size:9px;margin:13px 0 5px}
+.demo-right .r-title:first-child{margin-top:0}
+.cand{padding:6px 9px;margin-bottom:5px;border-radius:9px}
+.cand .nm{font-size:10.5px}
+.cand .pc{font-size:12px}
+.cand .src{font-size:8.8px;margin-top:1px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cand .bar{height:3px;margin-top:4px}
+.codebox{font-size:8.8px;line-height:1.45;padding:8px 10px;margin-bottom:10px}
+.event-box{padding:8px 10px;font-size:10px;line-height:1.45;margin-bottom:10px}
+.event-box b{font-size:9px;margin-bottom:2px}
+.call-detail{padding:8px 10px;font-size:10px}
+.call-detail .tool{font-size:10.5px}
+.call-detail .tags{margin:5px 0}
+.call-detail .tags span{font-size:8.8px;padding:1px 7px}
+
+/* compact demo right panel v2 */
+.demo-right .r-title{margin:10px 0 4px}
+.cand{padding:5px 8px;margin-bottom:4px}
+.codebox{font-size:8.4px;line-height:1.38;padding:7px 9px;margin-bottom:8px}
+.event-box{font-size:9.5px;padding:7px 9px;margin-bottom:8px}
+.call-detail{padding:7px 9px}
+.call-detail .mut{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
