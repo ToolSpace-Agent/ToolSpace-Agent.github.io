@@ -986,7 +986,7 @@ document.getElementById('copyBibTop').onclick=e=>copyBibText(e.target);
   cv.addEventListener('pointerup',()=>drag=null);
   cv.addEventListener('wheel',e=>{e.preventDefault();cam.z=Math.min(2.8,Math.max(.6,cam.z*(e.deltaY<0?1.09:.92)))},{passive:false});
   if(new URLSearchParams(location.search).has('paper')){document.body.classList.add('paper');
-    $('kRange').value=6;$('kOut').textContent='6';$('lRange').value=28;$('lOut').textContent='28';$('spRange').value=2.5;$('spOut').textContent='2.5×'}
+    $('kRange').value=6;$('kOut').textContent='6';$('lRange').value=28;$('lOut').textContent='28';}
   new ResizeObserver(resize).observe(stage);resize();bg.forEach(s=>s.tw0=.5+Math.random());pickStart();requestAnimationFrame(draw);
   new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting&&!started)setTimeout(play,450);if(!e.isIntersecting&&playing)stop()})},{threshold:.22}).observe(stage);
 })();
