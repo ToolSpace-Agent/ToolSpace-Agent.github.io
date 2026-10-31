@@ -224,8 +224,15 @@ nav.scrolled .cta{background:var(--blue);color:#fff}
 .pro-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--shadow-sm)}
 .pro-card h3{font-size:18px} .pro-card .sub2{color:var(--muted);font-size:12.5px;margin:5px 0 18px}
 .drop-row{margin-bottom:15px}
-.drop-row .hd{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px}
+.drop-colhead{display:flex;justify-content:space-between;gap:12px;font-size:10px;font-weight:850;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:13px}
+.drop-colhead span:last-child{color:var(--rose)}
+.drop-row .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;font-size:12.5px;margin-bottom:6px}
 .drop-row .hd b{color:var(--ink)} .drop-row .hd span{color:var(--muted)}
+.drop-id{display:flex;flex-direction:column;gap:3px;min-width:0}
+.drop-id .std{font-size:11.5px;color:var(--muted)}
+.pro-score{flex:none;text-align:right;line-height:1}
+.pro-score small{display:block;font-size:9px;font-weight:850;letter-spacing:.14em;text-transform:uppercase;color:var(--rose);margin-bottom:3px}
+.pro-score strong{display:block;font-size:24px;font-weight:850;letter-spacing:-.02em;color:var(--rose)}
 .drop-track{position:relative;height:16px;background:#eef1f8;border-radius:99px}
 .drop-std,.drop-pro{position:absolute;left:0;top:0;height:100%;border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1)}
 .drop-std{background:#cbd8f2}.drop-pro{background:linear-gradient(90deg,#e11d63,#f59e0b)}
@@ -621,9 +628,9 @@ body.paper .demo-right>p.r-title:last-of-type,body.paper .call-detail{display:no
     <p>Anchoring ToolSpace to AutomationBench and τ³-Bench Banking links in outside tools that share witnessed relations, then walks with larger \(L\) and \(K\). Same protocol, same prompts — longer chains (26.8–43.6 → 56.3–60.6 tool calls on AutomationBench) and real cross-environment breadth. Frontier models drop by up to <b>32.9 points</b>.</p>
   </div>
   <div class="pro-grid reveal">
-    <article class="pro-card"><h3>AutomationBench Pro</h3><p class="sub2">600 tasks · standard → Pro score, six frontier models</p><div id="proAuto"></div>
+    <article class="pro-card"><h3>AutomationBench Pro</h3><p class="sub2">300 tasks · six frontier models · final Pro score (rose, right)</p><div id="proAuto"></div>
       </article>
-    <article class="pro-card"><h3>τ³-Bench Banking Pro</h3><p class="sub2">98 tasks · standard → Pro score, six frontier models</p><div id="proTau"></div>
+    <article class="pro-card"><h3>τ³-Bench Banking Pro</h3><p class="sub2">98 tasks · six frontier models · final Pro score (rose, right)</p><div id="proTau"></div>
       </article>
   </div>
   <div class="tc-grid reveal">
@@ -1124,7 +1131,7 @@ renderBoard();
 /* ================= PRO CHARTS ================= */
 const PRO_AUTO=[['Claude Opus 5.5',59.2,26.3],['GPT 6.1 Sol',50.8,24.7],['DeepSeek V4.1',50.0,20.0],['GLM 5.3',51.5,22.7],['Qwen 3.8 Max',49.7,24.0],['GLM 5.2',29.3,18.0]];
 const PRO_TAU=[['Claude Opus 5.5',51.5,35.7],['GPT 6.1 Sol',46.4,29.6],['DeepSeek V4.1',47.4,35.7],['GLM 5.3',40.2,20.4],['Qwen 3.8 Max',55.2,29.6],['GLM 5.2',37.1,12.2]];
-function proHTML(rows){return rows.map(([n,s,p])=>`<div class="drop-row"><div class="hd"><b>${n}</b><span>Std ${s.toFixed(1)} → Pro ${p.toFixed(1)} &nbsp;<span class="delta">−${(s-p).toFixed(1)}</span></span></div>
+function proHTML(rows){return `<div class="drop-colhead"><span>Model · standard score</span><span>Final Pro score</span></div>`+rows.map(([n,s,p])=>`<div class="drop-row"><div class="hd"><div class="drop-id"><b>${n}</b><span class="std">Standard ${s.toFixed(1)} &nbsp;<span class="delta">−${(s-p).toFixed(1)} vs Std</span></span></div><div class="pro-score"><small>Pro</small><strong>${p.toFixed(1)}</strong></div></div>
   <div class="drop-track"><div class="drop-std" style="width:${s}%"></div><div class="drop-pro" style="width:${p}%"></div></div></div>`).join('')}
 $('proAuto').innerHTML=proHTML(PRO_AUTO);$('proTau').innerHTML=proHTML(PRO_TAU);
 /* ================= TOOL-CALL COMPARISON (paper Fig. 6) ================= */
