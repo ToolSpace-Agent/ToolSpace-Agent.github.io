@@ -101,6 +101,15 @@ nav.scrolled .cta{background:var(--blue);color:#fff}
 .takeaways b{color:var(--blue);font-size:15px}
 @media(max-width:820px){.tldr-card{grid-template-columns:1fr}}
 
+.overview-film{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:22px 22px 18px}
+.overview-film-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin:4px 8px 14px}
+.overview-film-head h3{font-size:18px;margin:8px 0 0}
+.overview-film-head p{margin:6px 0 0;color:var(--ink2);font-size:13.5px;max-width:62ch}
+.film-meta{flex:none;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7dd3fc;border:1px solid rgba(125,211,252,.35);background:rgba(125,211,252,.08);border-radius:99px;padding:6px 10px}
+.film-frame{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line2);background:#050814;aspect-ratio:16/9}
+.film-frame video{display:block;width:100%;height:100%;object-fit:contain;background:#050814}
+@media(max-width:700px){.overview-film-head{flex-direction:column;align-items:flex-start}}
+
 /* ---------- Compare / Idea ---------- */
 .compare{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:stretch}
 .cmp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:var(--shadow-sm)}
@@ -298,20 +307,18 @@ footer .wrap{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 
 
 /* tidy result stack (One-minute right column) */
-.res-stack{display:grid;gap:14px;align-content:start}
-.res-card{background:#0c152c;border:1px solid var(--line2);border-radius:15px;padding:17px 19px}
+.res-stack{display:grid;gap:12px;height:100%;grid-template-rows:auto minmax(0,1fr)}
+.res-stack .res-card:last-child{display:flex;flex-direction:column}
+.res-stack .res-card:last-child .cost-foot{margin-top:auto}
+.res-card{background:#0c152c;border:1px solid var(--line2);border-radius:15px;padding:14px 16px}
 .res-head{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:850;letter-spacing:.17em;text-transform:uppercase;color:#7dd3fc;margin-bottom:6px}
 .res-head span{color:var(--faint);letter-spacing:.05em;text-transform:none;font-weight:600;font-size:11px}
-.res-model{padding:11px 0 12px;border-top:1px dashed var(--line2)}
+.res-model{padding:9px 0 8px;border-top:1px dashed var(--line2)}
 .res-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .res-top b{font-size:14.5px;color:#fff}
 .res-sub{font-size:12.5px;color:var(--muted);margin:4px 0 9px;font-family:ui-monospace,Menlo,monospace}
 .res-sub b{color:var(--ink)} .res-sub .to{color:#7dd3fc;font-size:13.5px}
-.cost-row{display:flex;align-items:center;gap:18px;padding-top:8px}
-.cost-num{font-size:37px;font-weight:880;letter-spacing:-.03em;color:#4da3ff;line-height:1;flex:none}
-.cost-meta b{display:block;font-size:15.5px;color:#fff}
-.cost-meta span{font-size:11.5px;color:var(--muted)}
-.cost-foot{margin-top:12px;padding-top:11px;border-top:1px dashed var(--line2);font-size:12px;color:var(--muted);line-height:1.6}
+.cost-foot{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line2);font-size:12px;color:var(--muted);line-height:1.45}
 
 
 /* compact leaderboard (fit one screen) */
@@ -488,20 +495,32 @@ body.paper .demo-right>p.r-title:last-of-type,body.paper .call-detail{display:no
         </div>
       </div>
       <div class="res-card">
-        <div class="res-head">Cost <span>environment synthesis</span></div>
-        <div class="cost-row"><div class="cost-num">−55.3%</div>
-          <div class="cost-meta"><b>1,218 vs. 2,724 files</b><span>500 sampled environments</span></div></div>
-        <table class="cost-table">
-          <tr><th>File type</th><th>Data-centric</th><th>ToolSpace</th><th>Saved</th></tr>
-          <tr><td>JSON</td><td>2,643</td><td>1,205</td><td class="sv">−54.4%</td></tr>
-          <tr><td>CSV</td><td>42</td><td>7</td><td class="sv">−83.3%</td></tr>
-          <tr><td>Other *</td><td>39</td><td>6</td><td class="sv">−84.6%</td></tr>
-          <tr class="tot"><td>Total</td><td>2,724</td><td>1,218</td><td class="sv">−1,506 files</td></tr>
-        </table>
-        <div class="cost-foot">Only <b style="color:var(--ink)">22.5%</b> of environments are operation-bearing and need a database at all — the rest restore snapshots or replay cached returns. <span style="color:var(--faint)">* MD / PY / TXT / YAML / SH &amp; misc.</span></div>
+        <div class="res-head">Cost <span>500 sampled environments</span></div>
+        <div class="res-model" style="border-top:0;padding-top:4px;padding-bottom:2px">
+          <div class="res-top"><b>Synthesized files</b><span class="delta" style="background:rgba(77,163,255,.12);border:1px solid rgba(77,163,255,.4);color:#7eb6ff;font-weight:850;font-size:12px;padding:2px 9px;border-radius:99px">−55.3%</span></div>
+          <div class="res-sub">Data-centric&nbsp; <b>2,724</b> → <b class="to">1,218</b> &nbsp;·&nbsp; −1,506 files</div>
+          <div class="perf-track" style="position:relative;height:8px;background:#16223f;border-radius:99px"><i style="position:absolute;left:0;top:0;height:100%;border-radius:99px;background:#2c4a85;width:100%"></i><u style="position:absolute;left:0;top:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#2456d6);text-decoration:none;width:44.7%"></u></div>
+        </div>
+        <div class="cost-foot">22.5% of environments need a database; the rest restore snapshots or replay cached returns.</div>
       </div>
     </div>
   </div></div>
+
+  <div class="overview-film reveal">
+    <div class="overview-film-head">
+      <div>
+        <div class="eyebrow">Overview film</div>
+        <h3>The framework and the results, in one pass.</h3>
+        <p>A short walk through tool-centric synthesis — the two stages, then the performance and cost numbers on the same canvas.</p>
+      </div>
+      <span class="film-meta">1:02 · Demo</span>
+    </div>
+    <div class="film-frame">
+      <video controls playsinline preload="metadata" aria-label="ToolSpace framework and results overview">
+        <source src="toolspace-overview.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
 </div></section>
 
 <!-- ================= IDEA ================= -->
